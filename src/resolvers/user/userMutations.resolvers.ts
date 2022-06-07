@@ -7,21 +7,19 @@ import {
   IUser,
   IUserCreate,
   IUserDelete,
-  IUserDeleteMessage,
   IUserLogin,
-  IUserToken,
   IUserTokenDecripted,
   IUserUpdate,
 } from "../../interfaces/user.interfaces";
 
 require("dotenv").config();
 
-interface GraphQLContext extends ExpressContext {
+export interface GraphQLContext extends ExpressContext {
   decoded_user: IUserTokenDecripted;
 }
 
-export const userMutationsResolvers = {
-  create: async (parent: any, args: IUserCreate): Promise<IUser> => {
+export class userMutationsResolvers {
+  static async create(args: IUserCreate): Promise<IUser> {
     const { email } = args;
     const userRepository = AppDataSource.getRepository(User);
 
@@ -42,13 +40,12 @@ export const userMutationsResolvers = {
     await userRepository.save(user);
 
     return user;
-  },
+  }
 
-  update: async (
-    parent: any,
+  static async update(
     args: IUserUpdate,
     context: GraphQLContext
-  ): Promise<IUser> => {
+  ): Promise<IUser> {
     const { id } = args;
     if (!context.decoded_user || context.decoded_user.id !== id) {
       throw new AuthenticationError("Unauthorized");
@@ -69,13 +66,12 @@ export const userMutationsResolvers = {
     }
 
     return user;
-  },
+  }
 
-  delete: async (
-    parent: any,
+  static async delete(
     { id }: IUserDelete,
     context: GraphQLContext
-  ): Promise<IUserDeleteMessage> => {
+  ): Promise<string> {
     if (!context.decoded_user || context.decoded_user.id !== id) {
       throw new AuthenticationError("Unauthorized");
     }
@@ -88,9 +84,9 @@ export const userMutationsResolvers = {
 
     await userRepository.delete(id);
 
-    return { status: true, message: "User Deleted" };
-  },
-  login: async (parent: any, args: IUserLogin): Promise<IUserToken> => {
+    return "User Deleted";
+  }
+  static async login(args: IUserLogin): Promise<string> {
     const { email, password } = args;
     const userRepository = AppDataSource.getRepository(User);
 
@@ -110,6 +106,6 @@ export const userMutationsResolvers = {
       expiresIn: process.env.EXPIRES_IN,
     });
 
-    return { token };
-  },
-};
+    return token;
+  }
+}

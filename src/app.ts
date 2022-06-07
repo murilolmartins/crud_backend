@@ -1,10 +1,10 @@
 import express from "express";
 import cors from "cors";
-import { ApolloServer } from "apollo-server-express";
-import { typeDefs } from "./schema/index";
-import { resolvers } from "./resolvers/index";
-import { GraphQLError } from "graphql";
 import jwt from "jsonwebtoken";
+import { graphqlHTTP } from "express-graphql";
+import { schema } from "./schema/index";
+const expressPlayground =
+  require("graphql-playground-middleware-express").default;
 
 require("dotenv").config();
 
@@ -22,26 +22,18 @@ require("dotenv").config();
       return null;
     }
   };
-
-  const server = new ApolloServer({
-    typeDefs,
-    resolvers,
-    context: ({ req }) => ({
-      decoded_user: getUser(req.headers.authorization),
-    }),
-    formatError: (error: GraphQLError) => {
-      return {
-        message: error.message,
-        locations: error.locations,
-        stack: error.stack,
-      };
-    },
-  });
-
-  await server.start();
-
-  server.applyMiddleware({ app, path: "/api" });
-
+  app.use(express.json());
+  app.use(
+    "/graphql",
+    graphqlHTTP((req) => ({
+      schema,
+      graphiql: true,
+      context: {
+        decoded_user: getUser(req.headers.authorization),
+      },
+    }))
+  );
+  app.get("/playground", expressPlayground({ endpoint: "/graphql" }));
   app.use(cors());
 
   app.listen(process.env.PORT, () => {
