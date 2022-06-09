@@ -47,9 +47,9 @@ export class userMutationsResolvers {
     context: GraphQLContext
   ): Promise<IUser> {
     const { id } = args;
-    if (!context.decoded_user || context.decoded_user.id !== id) {
-      throw new AuthenticationError("Unauthorized");
-    }
+    // if (!context.decoded_user || context.decoded_user.id !== id) {
+    //   throw new AuthenticationError("Unauthorized");
+    // }
     const userRepository = AppDataSource.getRepository(User);
 
     if (args.password) {
@@ -72,9 +72,9 @@ export class userMutationsResolvers {
     { id }: IUserDelete,
     context: GraphQLContext
   ): Promise<string> {
-    if (!context.decoded_user || context.decoded_user.id !== id) {
-      throw new AuthenticationError("Unauthorized");
-    }
+    // if (!context.decoded_user || context.decoded_user.id !== id) {
+    //   throw new AuthenticationError("Unauthorized");
+    // }
     const userRepository = AppDataSource.getRepository(User);
     const user = await userRepository.findOne({ where: { id } });
 

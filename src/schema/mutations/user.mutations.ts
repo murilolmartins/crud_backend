@@ -107,6 +107,7 @@ export const DELETE_USER = mutationWithClientMutationId({
   mutateAndGetPayload: async (args: IUserDelete, context: GraphQLContext) => {
     const message = await userMutationsResolvers.delete(args, context);
     return {
+      deleteID: args.id,
       message,
       error: null,
       success: "User Deleted",
@@ -122,6 +123,16 @@ export const DELETE_USER = mutationWithClientMutationId({
         return message;
       },
     },
+    deleteID: {
+      type: GraphQLString,
+      resolve: ({ deleteID }) => {
+        if (!deleteID) {
+          return null;
+        }
+        return deleteID;
+      },
+    },
+
     error: {
       type: GraphQLString,
       resolve: ({ error }: { error: string }) => error,
